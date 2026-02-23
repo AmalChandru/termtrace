@@ -1,4 +1,4 @@
-# termtrace
+# termtrace 🫆
 A reproducible terminal workflow recorder for debugging and knowledge sharing.
 
 termtrace captures commands, outputs, and execution context so sessions can be replayed step by step. It provides a deterministic, machine-readable trace of terminal workflows, sitting between shell history and screen recording.
