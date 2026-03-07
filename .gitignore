@@ -1,0 +1,17 @@
+# Binaries
+bin/
+termtrace
+
+# Workflow test files
+*.wf
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
