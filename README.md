@@ -18,6 +18,24 @@ termtrace record
 termtrace stop
 termtrace replay session.wf
 ```
+
+## Building
+
+From the repository root:
+
+```shell
+go build -o bin/termtrace ./cmd/termtrace
+```
+
+## Project layout
+
+| Path | Role |
+|------|------|
+| `cmd/termtrace/` | CLI entrypoint |
+| `internal/record/` | Recording Start/Stop |
+| `internal/replay/` | Replay |
+| `internal/workflow/` | `.wf` format and persistence (forthcoming) |
+
 ## Status
 Early development. APIs and file formats may change.
 

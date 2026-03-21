@@ -1,6 +1,5 @@
 # Binaries
 bin/
-termtrace
 
 # Workflow test files
 *.wf
