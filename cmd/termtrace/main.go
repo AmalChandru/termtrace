@@ -34,13 +34,16 @@ func newRootCmd() *cobra.Command {
 }
 
 func newRecordCmd() *cobra.Command {
-	return &cobra.Command{
+	var output string
+	c := &cobra.Command{
 		Use:   "record",
 		Short: "Start recording a terminal session",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return record.Start()
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return record.Start(output)
 		},
 	}
+	c.Flags().StringVarP(&output, "output", "o", "session.wf", "path to write the workflow file")
+	return c
 }
 
 func newStopCmd() *cobra.Command {

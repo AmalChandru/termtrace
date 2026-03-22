@@ -2,7 +2,10 @@ module github.com/AmalChandru/termtrace
 
 go 1.25
 
-require github.com/spf13/cobra v1.10.2
+require (
+	github.com/creack/pty v1.1.24
+	github.com/spf13/cobra v1.10.2
+)
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
