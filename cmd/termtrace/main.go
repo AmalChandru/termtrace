@@ -57,16 +57,20 @@ func newStopCmd() *cobra.Command {
 }
 
 func newReplayCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "replay [workflow.wf]",
+	var auto bool
+	var startStep int
+	c := &cobra.Command{
+		Use:   "replay <workflow.wf>",
 		Short: "Replay a recorded workflow file",
-		Args:  cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			path := ""
-			if len(args) > 0 {
-				path = args[0]
-			}
-			return replay.Run(path)
+		Args:  cobra.ExactArgs(1),
+		RunE: func(_ *cobra.Command, args []string) error {
+			return replay.Run(args[0], replay.Options{
+				Auto:      auto,
+				StartStep: startStep,
+			})
 		},
 	}
+	c.Flags().BoolVarP(&auto, "auto", "y", false, "replay all steps without waiting for Enter")
+	c.Flags().IntVar(&startStep, "step", 1, "start replay from step number (1-based)")
+	return c
 }
