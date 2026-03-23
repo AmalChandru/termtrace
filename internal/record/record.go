@@ -79,6 +79,9 @@ func RunRecord(outputPath string) error {
 				if cmd.Process != nil {
 					_ = cmd.Process.Signal(sig)
 				}
+				// Ensure the record loop can exit even if stdin read is blocked.
+				_ = ptyFile.Close()
+				cancel()
 			}
 		}
 	}()
@@ -86,11 +89,46 @@ func RunRecord(outputPath string) error {
 	stdin := os.Stdin
 	lineBuf := make([]byte, 0, 256)
 	readOne := make([]byte, 1)
+	type stdinEvent struct {
+		n   int
+		b   byte
+		err error
+	}
+	stdinCh := make(chan stdinEvent, 16)
+	go func() {
+		for {
+			n, readErr := stdin.Read(readOne)
+			ev := stdinEvent{n: n, err: readErr}
+			if n == 1 {
+				ev.b = readOne[0]
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case stdinCh <- ev:
+			}
+			if readErr != nil {
+				return
+			}
+		}
+	}()
 
+recordLoop:
 	for {
-		n, readErr := stdin.Read(readOne)
-		if n == 1 {
-			b := readOne[0]
+		select {
+		case <-ctx.Done():
+			break recordLoop
+		case ev := <-stdinCh:
+			if ev.n != 1 {
+				if ev.err == io.EOF {
+					break recordLoop
+				}
+				if ev.err != nil {
+					return fmt.Errorf("record: stdin: %w", ev.err)
+				}
+				continue
+			}
+			b := ev.b
 			if b == '\n' || b == '\r' {
 				line := string(lineBuf)
 				lineBuf = lineBuf[:0]
@@ -128,13 +166,6 @@ func RunRecord(outputPath string) error {
 				continue
 			}
 			lineBuf = append(lineBuf, b)
-			continue
-		}
-		if readErr == io.EOF {
-			break
-		}
-		if readErr != nil {
-			return fmt.Errorf("record: stdin: %w", readErr)
 		}
 	}
 
