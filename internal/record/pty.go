@@ -3,6 +3,8 @@ package record
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/creack/pty"
 )
@@ -14,9 +16,25 @@ func StartPTYShell() (*os.File, *exec.Cmd, error) {
 		shell = "/bin/sh"
 	}
 
-	// TODO: login shell; change flags per shell later
-	cmd := exec.Command(shell, "-l")
-	cmd.Env = append(os.Environ(), "TERM=xterm-256color")
+	shellName := strings.ToLower(filepath.Base(shell))
+
+	// Start a clean interactive shell for recording.
+	// User startup files can inject shell-specific completion code that breaks
+	// in PTY capture contexts and pollutes command output.
+	// TODO: Add a --use-shell-rc flag to opt into normal shell startup files.
+	var cmd *exec.Cmd
+	switch shellName {
+	case "bash":
+		cmd = exec.Command(shell, "--noprofile", "--norc", "-i")
+	case "zsh":
+		cmd = exec.Command(shell, "-f", "-i")
+	case "fish":
+		cmd = exec.Command(shell, "--no-config", "-i")
+	default:
+		// Fallback for POSIX shells that may not support -i as a standalone flag.
+		cmd = exec.Command(shell)
+	}
+	cmd.Env = append(os.Environ(), "TERM=xterm-256color", "PS1=$ ")
 
 	master, err := pty.Start(cmd)
 	if err != nil {
