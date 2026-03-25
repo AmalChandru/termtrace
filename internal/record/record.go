@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -65,6 +66,18 @@ func RunRecord(outputPath string) error {
 	var steps []workflow.Step
 	var pendingCmd string
 	firstLine := true
+	appendStep := func(command, out string) {
+		if strings.TrimSpace(command) == "" {
+			return
+		}
+		steps = append(steps, workflow.Step{
+			Command:   command,
+			Stdout:    out,
+			Stderr:    "",
+			ExitCode:  0,
+			Timestamp: time.Now().UTC(),
+		})
+	}
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
@@ -147,13 +160,7 @@ recordLoop:
 					out := pendingOut.String()
 					pendingOut.Reset()
 					mu.Unlock()
-					steps = append(steps, workflow.Step{
-						Command:   pendingCmd,
-						Stdout:    out,
-						Stderr:    "",
-						ExitCode:  0,
-						Timestamp: time.Now().UTC(),
-					})
+					appendStep(pendingCmd, out)
 				}
 				pendingCmd = line
 
@@ -175,13 +182,7 @@ recordLoop:
 		mu.Lock()
 		out := pendingOut.String()
 		mu.Unlock()
-		steps = append(steps, workflow.Step{
-			Command:   pendingCmd,
-			Stdout:    out,
-			Stderr:    "",
-			ExitCode:  0,
-			Timestamp: time.Now().UTC(),
-		})
+		appendStep(pendingCmd, out)
 	}
 
 	_ = ptyFile.Close()
