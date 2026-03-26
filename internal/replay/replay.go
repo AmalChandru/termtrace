@@ -17,6 +17,18 @@ type Options struct {
 	StartStep int
 }
 
+const (
+	colorReset = "\033[0m"
+	colorDim   = "\033[2m"
+	colorCyan  = "\033[36m"
+	colorGreen = "\033[32m"
+	colorRed   = "\033[31m"
+)
+
+func style(s, c string) string {
+	return c + s + colorReset
+}
+
 func Run(path string, opts Options) error {
 
 	if path == "" {
@@ -50,8 +62,16 @@ func Run(path string, opts Options) error {
 			return nil
 		default:
 		}
+
 		step := wf.Steps[i]
-		fmt.Printf("[%d/%d] $ %s\n", i+1, total, step.Command)
+
+		stepLabel := fmt.Sprintf("[%d/%d]", i+1, total)
+		fmt.Printf("%s %s %s\n",
+			style(stepLabel, colorDim),
+			style("$", colorCyan),
+			style(step.Command, colorCyan),
+		)
+
 		if step.Stdout != "" {
 			fmt.Print(step.Stdout)
 			if step.Stdout[len(step.Stdout)-1] != '\n' {
@@ -64,9 +84,16 @@ func Run(path string, opts Options) error {
 				fmt.Fprintln(os.Stderr)
 			}
 		}
-		fmt.Printf("exit code: %d\n", step.ExitCode)
+
+		exitText := fmt.Sprintf("exit code: %d", step.ExitCode)
+		if step.ExitCode == 0 {
+			fmt.Println(style(exitText, colorGreen))
+		} else {
+			fmt.Println(style(exitText, colorRed))
+		}
+
 		if !opts.Auto && i < total-1 {
-			fmt.Print("Press Enter for next step...")
+			fmt.Print(style("Press Enter for next step...", colorDim))
 			if _, err := reader.ReadString('\n'); err != nil {
 				return fmt.Errorf("replay: read input: %w", err)
 			}
