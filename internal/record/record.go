@@ -160,7 +160,7 @@ recordLoop:
 					out := pendingOut.String()
 					pendingOut.Reset()
 					mu.Unlock()
-					appendStep(pendingCmd, out)
+					appendStep(pendingCmd, cleanStepOutput(out, pendingCmd))
 				}
 				pendingCmd = line
 
@@ -182,7 +182,7 @@ recordLoop:
 		mu.Lock()
 		out := pendingOut.String()
 		mu.Unlock()
-		appendStep(pendingCmd, out)
+		appendStep(pendingCmd, cleanStepOutput(out, pendingCmd))
 	}
 
 	_ = ptyFile.Close()
