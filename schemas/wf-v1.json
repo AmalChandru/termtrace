@@ -30,6 +30,11 @@
           "type": "string",
           "format": "date-time",
           "description": "RFC 3339 timestamp"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Wall milliseconds from command sent to PTY until next line or session end"
         }
       }
     }

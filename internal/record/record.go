@@ -65,17 +65,23 @@ func RunRecord(outputPath string) error {
 
 	var steps []workflow.Step
 	var pendingCmd string
+	var lastCmdStart time.Time
 	firstLine := true
 	appendStep := func(command, out string) {
 		if strings.TrimSpace(command) == "" {
 			return
 		}
+		var durMs int64
+		if !lastCmdStart.IsZero() {
+			durMs = time.Since(lastCmdStart).Milliseconds()
+		}
 		steps = append(steps, workflow.Step{
-			Command:   command,
-			Stdout:    out,
-			Stderr:    "",
-			ExitCode:  0,
-			Timestamp: time.Now().UTC(),
+			Command:    command,
+			Stdout:     out,
+			Stderr:     "",
+			ExitCode:   0,
+			Timestamp:  time.Now().UTC(),
+			DurationMs: durMs,
 		})
 	}
 
@@ -170,6 +176,7 @@ recordLoop:
 					wg.Wait()
 					return fmt.Errorf("record: write pty: %w", werr)
 				}
+				lastCmdStart = time.Now()
 				continue
 			}
 			lineBuf = append(lineBuf, b)
