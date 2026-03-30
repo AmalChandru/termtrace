@@ -17,11 +17,11 @@ type Workflow struct {
 
 // Step is one captured command and its result.
 type Step struct {
-	Command    string    `json:"command"`
-	Stdout     string    `json:"stdout"`
-	Stderr     string    `json:"stderr"`
-	ExitCode   int       `json:"exit_code"`
-	Timestamp  time.Time `json:"timestamp"`
+	Command   string    `json:"command"`
+	Stdout    string    `json:"stdout"`
+	Stderr    string    `json:"stderr"`
+	ExitCode  int       `json:"exit_code"`
+	Timestamp time.Time `json:"timestamp"`
 	// DurationMs is wall time from sending this command to the PTY until the next line
 	// is submitted or the session ends (includes output, reading, and typing—not shell CPU time).
 	DurationMs int64 `json:"duration_ms,omitempty"`

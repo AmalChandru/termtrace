@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"sync"
 	"syscall"
@@ -19,8 +20,6 @@ import (
 // Each line you type (terminated by Enter) is one Step.Command; Step.Stdout is PTY output
 // until the next line or end of session.
 
-// TODO: ExitCode is always 0 for now; shell does not expose per-command exit status.
-// Shell integration parsing can help (?)
 func RunRecord(outputPath string) error {
 	if outputPath == "" {
 		outputPath = "session.wf"
@@ -29,6 +28,11 @@ func RunRecord(outputPath string) error {
 	ptyFile, cmd, err := StartPTYShell()
 	if err != nil {
 		return fmt.Errorf("record: start shell: %w", err)
+	}
+
+	shellName := strings.ToLower(filepath.Base(os.Getenv("SHELL")))
+	if shellName == "zsh" {
+		_, _ = io.WriteString(ptyFile, "eval \"$ZSH_EXIT_CODE_HOOK\"\n")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -67,19 +71,22 @@ func RunRecord(outputPath string) error {
 	var pendingCmd string
 	var lastCmdStart time.Time
 	firstLine := true
-	appendStep := func(command, out string) {
+	appendStep := func(command, rawOut string) {
 		if strings.TrimSpace(command) == "" {
 			return
 		}
+
+		exitCode, cleanedOut := extractExitCodeAndCleanOutput(rawOut, command)
+
 		var durMs int64
 		if !lastCmdStart.IsZero() {
 			durMs = time.Since(lastCmdStart).Milliseconds()
 		}
 		steps = append(steps, workflow.Step{
 			Command:    command,
-			Stdout:     out,
+			Stdout:     cleanedOut,
 			Stderr:     "",
-			ExitCode:   0,
+			ExitCode:   exitCode,
 			Timestamp:  time.Now().UTC(),
 			DurationMs: durMs,
 		})
@@ -166,7 +173,7 @@ recordLoop:
 					out := pendingOut.String()
 					pendingOut.Reset()
 					mu.Unlock()
-					appendStep(pendingCmd, cleanStepOutput(out, pendingCmd))
+					appendStep(pendingCmd, out)
 				}
 				pendingCmd = line
 
@@ -189,7 +196,7 @@ recordLoop:
 		mu.Lock()
 		out := pendingOut.String()
 		mu.Unlock()
-		appendStep(pendingCmd, cleanStepOutput(out, pendingCmd))
+		appendStep(pendingCmd, out)
 	}
 
 	_ = ptyFile.Close()

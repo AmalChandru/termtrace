@@ -2,6 +2,7 @@ package record
 
 import (
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -11,16 +12,24 @@ var (
 )
 
 func cleanStepOutput(raw, command string) string {
+	_, out := extractExitCodeAndCleanOutput(raw, command)
+	return out
+}
+
+func extractExitCodeAndCleanOutput(raw, command string) (int, string) {
 	s := normalizeNewlines(raw)
 	s = stripBackspaces(s)
 	s = ansiOSC.ReplaceAllString(s, "")
 	s = ansiCSI.ReplaceAllString(s, "")
 	s = stripControlChars(s)
 
+	exitCode := 0
+	s, exitCode = stripAndParseExitCodeMarkers(s)
+
 	s = stripEchoedCommand(s, command)
 	s = stripTrailingPromptLine(s)
-
-	return strings.TrimRight(s, "\n")
+	s = strings.TrimRight(s, "\n")
+	return exitCode, s
 }
 
 func normalizeNewlines(s string) string {
@@ -51,6 +60,26 @@ func stripControlChars(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// Full line marker format -> "__TT_RC__:<int>"
+func stripAndParseExitCodeMarkers(s string) (string, int) {
+	lines := strings.Split(s, "\n")
+	out := make([]string, 0, len(lines))
+	exitCode := 0
+
+	for _, line := range lines {
+		t := strings.TrimSpace(line)
+		if strings.HasPrefix(t, exitCodeMarkerPrefix) {
+			raw := strings.TrimPrefix(t, exitCodeMarkerPrefix)
+			if n, err := strconv.Atoi(strings.TrimSpace(raw)); err == nil {
+				exitCode = n // last valid marker wins
+				continue
+			}
+		}
+		out = append(out, line)
+	}
+	return strings.Join(out, "\n"), exitCode
 }
 
 func stripEchoedCommand(out, cmd string) string {

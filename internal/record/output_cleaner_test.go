@@ -1,6 +1,9 @@
 package record
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestCleanStepOutput_normalizeNewlines(t *testing.T) {
 	t.Parallel()
@@ -50,5 +53,47 @@ func TestStripTrailingPromptLine_specialPrompts(t *testing.T) {
 		if got != "line" {
 			t.Fatalf("prompt %q: got %q", p, got)
 		}
+	}
+}
+
+func TestStripAndParseExitCodeMarkers_single(t *testing.T) {
+	t.Parallel()
+	out, code := stripAndParseExitCodeMarkers("hello\n__TT_RC__:7\n$")
+	if code != 7 {
+		t.Fatalf("code=%d want 7", code)
+	}
+	if strings.Contains(out, "__TT_RC__:") {
+		t.Fatalf("marker not stripped: %q", out)
+	}
+}
+
+func TestStripAndParseExitCodeMarkers_multipleLastWins(t *testing.T) {
+	t.Parallel()
+	out, code := stripAndParseExitCodeMarkers("__TT_RC__:1\nx\n__TT_RC__:42\n")
+	if code != 42 {
+		t.Fatalf("code=%d want 42", code)
+	}
+	if strings.Contains(out, "__TT_RC__:") {
+		t.Fatalf("marker not stripped: %q", out)
+	}
+}
+func TestStripAndParseExitCodeMarkers_malformedIgnored(t *testing.T) {
+	t.Parallel()
+	out, code := stripAndParseExitCodeMarkers("x\n__TT_RC__:bad\n")
+	if code != 0 {
+		t.Fatalf("code=%d want 0", code)
+	}
+	if !strings.Contains(out, "__TT_RC__:bad") {
+		t.Fatalf("malformed marker should remain in output: %q", out)
+	}
+}
+func TestExtractExitCodeAndCleanOutput(t *testing.T) {
+	t.Parallel()
+	code, out := extractExitCodeAndCleanOutput("echo hi\nhi\n__TT_RC__:3\n$ ", "echo hi")
+	if code != 3 {
+		t.Fatalf("code=%d want 3", code)
+	}
+	if out != "hi" {
+		t.Fatalf("out=%q want hi", out)
 	}
 }
