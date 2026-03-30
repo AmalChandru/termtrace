@@ -76,8 +76,8 @@ func ensureTrailingNewline(w io.Writer, s string) {
 	}
 }
 
-// replayText prints content, truncating large streams. When truncated and not auto,
-// prompts: type o then Enter to expand, or Enter to continue.
+// Prints content, truncating large streams. When truncated and not auto,
+// prompts -> type o then Enter to expand, or Enter to continue.
 func replayText(w io.Writer, content string, auto bool, reader *bufio.Reader, paint func(string)) error {
 	if content == "" {
 		return nil
