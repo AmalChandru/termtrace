@@ -41,6 +41,7 @@ func RunRecord(outputPath string) error {
 	var (
 		mu         sync.Mutex
 		pendingOut bytes.Buffer // PTY bytes for current command's stdout window
+		liveFilter liveOutputFilter
 	)
 
 	// PTY → real stdout + capture buffer
@@ -52,12 +53,13 @@ func RunRecord(outputPath string) error {
 		for {
 			n, readErr := ptyFile.Read(buf)
 			if n > 0 {
-				_, _ = os.Stdout.Write(buf[:n])
 				mu.Lock()
 				_, _ = pendingOut.Write(buf[:n])
 				mu.Unlock()
+				liveFilter.write(os.Stdout, buf[:n], false)
 			}
 			if readErr != nil {
+				liveFilter.write(os.Stdout, nil, true)
 				if readErr != io.EOF {
 					// PTY closed or error; stop stdin side
 				}
