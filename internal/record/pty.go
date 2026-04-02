@@ -61,5 +61,9 @@ func StartPTYShell() (*os.File, *exec.Cmd, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	// Best-effort: disable echo on the PTY slave side to avoid duplicated
+	// command input in captured/live output
+	// https://github.com/creack/pty/issues/204
+	_ = disablePTYEcho(master)
 	return master, cmd, nil
 }
