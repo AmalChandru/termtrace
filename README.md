@@ -5,6 +5,12 @@
 <h1 align="center">termtrace</h1>
 
 <p align="center">
+  <a href="https://github.com/AmalChandru/termtrace/actions/workflows/ci.yml"><img src="https://github.com/AmalChandru/termtrace/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/AmalChandru/termtrace/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AmalChandru/termtrace" alt="License"></a>
+  <a href="https://github.com/AmalChandru/termtrace/releases"><img src="https://img.shields.io/github/v/release/AmalChandru/termtrace?sort=semver" alt="Release"></a>
+</p>
+
+<p align="center">
   <b>Replay your terminal workflows, exactly as they happened.</b>
 </p>
 
