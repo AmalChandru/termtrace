@@ -34,6 +34,13 @@ The `termtrace` captures commands, outputs, and context so sessions can be repla
 ## Why
 Terminal workflows are hard to reproduce. The commands are scattered in shell history, the outputs are lost, and the context is easy to forget. Often times recreating what actually happened becomes a guesswork. The `termtrace` can turn terminal sessions into something you can replay.
 
+### Use cases
+
+- Maybe, instead of explaining the same setup steps to a new teammate, just share the `.wf`!
+- When you hit an upper rank 1 bug and don’t want to write it all down. You don’t have to rely on memory to reproduce it later.
+- That same weird infra issue which keeps coming back, and you’re always the one fixing it. Record it once and delegate it later :P
+- And more ...
+  
 ## Install
 
 #### 1. Download binary 
