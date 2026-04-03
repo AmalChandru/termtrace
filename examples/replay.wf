@@ -1,0 +1,61 @@
+{
+  "version": "1",
+  "steps": [
+    {
+      "command": "ls",
+      "stdout": "bin  flake.lock  go.mod  internal  Makefile   schemas  ux.wf\ncmd  flake.nix\t go.sum  LICENSE   README.md  test.wf",
+      "stderr": "",
+      "exit_code": 0,
+      "timestamp": "2026-04-02T13:51:22.390766726Z",
+      "duration_ms": 3408
+    },
+    {
+      "command": "cd internal",
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0,
+      "timestamp": "2026-04-02T13:51:23.70159263Z",
+      "duration_ms": 1310
+    },
+    {
+      "command": "ls",
+      "stdout": "app  cli  record  replay  workflow",
+      "stderr": "",
+      "exit_code": 0,
+      "timestamp": "2026-04-02T13:51:26.662786181Z",
+      "duration_ms": 2961
+    },
+    {
+      "command": "cd record",
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0,
+      "timestamp": "2026-04-02T13:51:27.687047195Z",
+      "duration_ms": 1024
+    },
+    {
+      "command": "ls",
+      "stdout": "live_output_filter.go\t    output_cleaner_test.go  pty_termios_other.go\nlive_output_filter_test.go  pty.go\t\t    record.go\noutput_cleaner.go\t    pty_termios_linux.go",
+      "stderr": "",
+      "exit_code": 0,
+      "timestamp": "2026-04-02T13:51:42.750651646Z",
+      "duration_ms": 15063
+    },
+    {
+      "command": "cd cat",
+      "stdout": "bash: cd: cat: No such file or directory",
+      "stderr": "",
+      "exit_code": 1,
+      "timestamp": "2026-04-02T13:51:53.18311291Z",
+      "duration_ms": 3383
+    },
+    {
+      "command": "exit",
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0,
+      "timestamp": "2026-04-02T13:51:53.184636609Z",
+      "duration_ms": 1
+    }
+  ]
+}
