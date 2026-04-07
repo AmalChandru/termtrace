@@ -73,7 +73,7 @@ The build will be available at: `./bin/termtrace`
 </p>
 
 #### Trace
-- Stores sessions as a structured `.wf` file ([JSON](/home/neozorba/Tinker/termtrace/schemas/wf-v1.json)).
+- Stores sessions as a structured `.wf` file ([JSON](https://github.com/AmalChandru/termtrace/blob/main/schemas/wf-v1.json)).
 - Machine-readable and deterministic.
 - Includes:
   - command
