@@ -72,6 +72,12 @@ The build will be available at: `./bin/termtrace`
   <img src="assets/replay.gif" alt="termtrace demo" width="650">
 </p>
 
+#### Share
+- Creates a cleaned `.wf` copy for safe sharing.
+- Applies built-in redaction for [common sensitive values](https://github.com/AmalChandru/termtrace/blob/main/internal/share/redact.go)
+- Supports custom pattern-based redaction rules.
+- Can trim noisy `stdout`/`stderr` output per step..
+
 #### Trace
 - Stores sessions as a structured `.wf` file ([JSON](https://github.com/AmalChandru/termtrace/blob/main/schemas/wf-v1.json)).
 - Machine-readable and deterministic.
@@ -99,6 +105,7 @@ termtrace --version
 |---------|---------|
 |`termtrace record`|Start an interactive recording session.|
 |`termtrace replay <workflow.wf>`| Replay a `.wf` file step by step.|
+|`termtrace share <workflow.wf>`| Create a sanitized `.wf` copy for sharing.|
 | `termtrace stop`| Intended to stop recording (still **not implemented**; errors at runtime), a mere `exit` will do the trick.
 
 ##### record
@@ -120,12 +127,25 @@ termtrace stop
 ```
 (No flags; not wired up yet..)
 
+##### share
+```shell
+termtrace share [--output path | -o path] [--trim-output N] [--redact pattern=replacement] [--no-default-redact] <workflow.wf>
+```
+- `-o` / `--output`: path to write cleaned workflow (default: `<input>.shared.wf`)
+- `--trim-output N`: max bytes to keep for each step's `stdout` and `stderr` (`0` means no trimming)
+- `--redact pattern=replacement`: custom redaction rule (repeatable)
+- `--no-default-redact`: disable built-in redaction rules and only apply custom `--redact` rules
+
 #### Examples
 ```shell
 termtrace record -o demo.wf
 termtrace replay demo.wf
 termtrace replay -y demo.wf
 termtrace replay --step 3 demo.wf
+termtrace share demo.wf
+termtrace share demo.wf -o demo.shared.wf
+termtrace share demo.wf --redact '(?i)customer_id=\S+=customer_id=<REDACTED>'
+termtrace share demo.wf --trim-output 4096
 ```
 #### Interactive replay (no --auto)
 Between steps you’ll see `(next: …)` and:
@@ -134,6 +154,9 @@ Between steps you’ll see `(next: …)` and:
 - `q` / `quit` → exit replay
 
 If stdout/stderr is truncated, `o` then `Enter` expands it.
+
+#### Sharing note
+`record` keeps the raw session as captured. Use `share` to create a cleaned export for RCA docs, onboarding, or bug reports. Built-in redaction helps with common secrets, but review the shared file before sending it out.
 
 
 ## Comparison
@@ -178,6 +201,7 @@ Replay does not execute commands again. It prints the recorded output and metada
 - Better input handling and shell integration (tab completion, user shell fidelity)
 - Improved capture and replay for TUIs and full-screen apps
 - Replay execution mode (re-run steps instead of just printing output)
+- Interactive step editing/removal for share mode
 
 ## Status
 Early development. APIs and file formats may change.

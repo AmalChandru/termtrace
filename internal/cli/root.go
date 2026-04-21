@@ -21,6 +21,7 @@ func NewRootCmd() *cobra.Command {
 		newRecordCmd(),
 		newStopCmd(),
 		newReplayCmd(),
+		newShareCmd(),
 	)
 	return root
 }
